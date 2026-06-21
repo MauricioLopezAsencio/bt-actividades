@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: bt-actividades
+    runtime: docker
+    repo: https://github.com/MauricioLopezAsencio/bt-actividades
+    branch: main
+    region: ohio
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/v1/actividades/fases
+    autoDeploy: true
+    envVars:
+      # Render inyecta PORT automáticamente; la app la lee con server.port=${PORT:3000}
+      - key: BITACORA_TIPO_SERVICIO_ID
+        value: "4"
