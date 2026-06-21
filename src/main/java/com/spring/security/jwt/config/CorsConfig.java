@@ -18,12 +18,12 @@ public class CorsConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
-                .allowedOrigins(
-                        "http://localhost:4200",
-                        "https://bitacora-front.onrender.com"
-                )
-                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                // allowedOriginPatterns permite cualquier origen incluso con
+                // allowCredentials(true); allowedOrigins("*") sería inválido en ese caso.
+                .allowedOriginPatterns("*")
+                .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
                 .allowedHeaders("*")
+                .exposedHeaders("X-Transaction-Id")
                 .allowCredentials(true);
     }
 }

@@ -19,7 +19,6 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/bitacora")
-@CrossOrigin("*")
 @Slf4j
 public class BitacoraController {
 

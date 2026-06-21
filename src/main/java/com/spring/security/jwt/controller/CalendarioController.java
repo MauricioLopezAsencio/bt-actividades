@@ -14,7 +14,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/calendario")
-@CrossOrigin("*")
 @Slf4j
 public class CalendarioController {
 

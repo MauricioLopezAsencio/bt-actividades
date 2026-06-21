@@ -13,7 +13,6 @@ import org.springframework.web.client.HttpClientErrorException;
 
 @RestController
 @RequestMapping("/api/v1/auth")
-@CrossOrigin("*")
 @Slf4j
 public class AuthController {
 
