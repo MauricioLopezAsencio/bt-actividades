@@ -61,13 +61,13 @@ public class KeepAliveTask {
     }
 
     /**
-     * Ping cada 10 min SOLO en horario activo (6:00–medianoche, hora México), para no
-     * gastar horas del plan free de madrugada: fuera de ese rango el servicio se duerme.
+     * Ping cada 10 min, 24/7. Mantiene el servicio siempre despierto. Un único
+     * servicio free a 24/7 consume ~720-744 h/mes, por debajo del límite (~750 h).
      * Cron de 6 campos (seg min hora día mes díaSemana). Configurable con
      * KEEP_ALIVE_CRON / KEEP_ALIVE_ZONE.
      */
     @Scheduled(
-            cron = "${app.keep-alive.cron:0 0/10 6-23 * * *}",
+            cron = "${app.keep-alive.cron:0 0/10 * * * *}",
             zone = "${app.keep-alive.zone:America/Mexico_City}")
     public void ping() {
         if (!enabled || !StringUtils.hasText(baseUrl)) {
