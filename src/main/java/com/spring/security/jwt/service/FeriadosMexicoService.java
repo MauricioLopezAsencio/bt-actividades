@@ -1,5 +1,6 @@
 package com.spring.security.jwt.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -10,6 +11,7 @@ import java.util.Set;
  * Formato MM-dd para que aplique independientemente del año,
  * excepto Semana Santa que es movible y debe revisarse anualmente.
  */
+@Slf4j
 @Service
 public class FeriadosMexicoService {
 
@@ -27,6 +29,10 @@ public class FeriadosMexicoService {
 
     public boolean esFeriado(LocalDate fecha) {
         String mesdia = String.format("%02d-%02d", fecha.getMonthValue(), fecha.getDayOfMonth());
-        return FERIADOS.contains(mesdia);
+        boolean feriado = FERIADOS.contains(mesdia);
+        if (feriado) {
+            log.debug("Fecha {} es feriado", fecha);
+        }
+        return feriado;
     }
 }

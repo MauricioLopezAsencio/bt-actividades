@@ -10,6 +10,7 @@ import com.spring.security.jwt.dto.WorkItemDto;
 import com.spring.security.jwt.service.IActividadService;
 import com.spring.security.jwt.service.MapeoTipoActividadFase;
 import com.spring.security.jwt.service.WorkItemCsvService;
+import com.spring.security.jwt.util.LogBanner;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -61,7 +62,13 @@ public class ActividadController {
             @Valid @RequestBody ActividadRequest request,
             HttpServletRequest servletRequest) {
 
+        String proceso = "Obtener actividades " + request.getFechaInicio() + " a " + request.getFechaFin()
+                + " username=" + request.getUsername();
+        long t0 = LogBanner.inicio(log, proceso);
+
         ActividadResultDto data = actividadService.obtenerActividades(request);
+
+        LogBanner.fin(log, proceso, t0);
         return ResponseEntity.ok(ApiResponse.ok(data, "Actividades obtenidas exitosamente")
                 .toBuilder().path(servletRequest.getRequestURI()).build());
     }
@@ -81,10 +88,13 @@ public class ActividadController {
                             .build());
         }
 
+        long t0 = LogBanner.inicio(log, "Importar work items CSV archivo=" + file.getOriginalFilename());
+
         List<WorkItemDto> items = workItemCsvService.parsear(file);
         String mensaje = items.size() + " work item(s) importados exitosamente";
 
         log.info("Importación CSV completada: {}", mensaje);
+        LogBanner.fin(log, "Importar work items CSV", t0);
         return ResponseEntity.ok(ApiResponse.ok(items, mensaje)
                 .toBuilder().path(servletRequest.getRequestURI()).build());
     }
@@ -107,10 +117,13 @@ public class ActividadController {
                             .build());
         }
 
+        long t0 = LogBanner.inicio(log, "Preparar work items fecha=" + fecha + " username=" + username);
+
         List<ActividadDto> actividades = workItemCsvService.preparar(file, fecha, username, password);
         String mensaje = actividades.size() + " actividad(es) preparadas desde work items";
 
         log.info("Work items preparados: {} fecha={}", actividades.size(), fecha);
+        LogBanner.fin(log, "Preparar work items fecha=" + fecha, t0);
         return ResponseEntity.ok(ApiResponse.ok(actividades, mensaje)
                 .toBuilder().path(servletRequest.getRequestURI()).build());
     }

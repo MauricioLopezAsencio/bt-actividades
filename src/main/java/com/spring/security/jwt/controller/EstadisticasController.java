@@ -4,6 +4,7 @@ import com.spring.security.jwt.dto.ApiResponse;
 import com.spring.security.jwt.dto.EstadisticasMesDto;
 import com.spring.security.jwt.dto.EstadisticasRequest;
 import com.spring.security.jwt.service.IEstadisticasService;
+import com.spring.security.jwt.util.LogBanner;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -29,7 +30,13 @@ public class EstadisticasController {
             @Valid @RequestBody EstadisticasRequest request,
             HttpServletRequest servletRequest) {
 
+        String proceso = "Estadísticas mes=" + request.getMes() + "/" + request.getAnio()
+                + " username=" + request.getUsername();
+        long t0 = LogBanner.inicio(log, proceso);
+
         EstadisticasMesDto data = estadisticasService.obtenerEstadisticasMes(request);
+
+        LogBanner.fin(log, proceso, t0);
         return ResponseEntity.ok(ApiResponse.ok(data, "Estadísticas obtenidas exitosamente")
                 .toBuilder().path(servletRequest.getRequestURI()).build());
     }

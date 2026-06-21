@@ -5,6 +5,7 @@ import com.spring.security.jwt.dto.BitacoraProyectosRequest;
 import com.spring.security.jwt.dto.RegistrarActividadRequest;
 import com.spring.security.jwt.dto.RegistrosPorFechaRequest;
 import com.spring.security.jwt.service.IBitacoraService;
+import com.spring.security.jwt.util.LogBanner;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -33,10 +34,13 @@ public class BitacoraController {
             @Valid @RequestBody RegistrarActividadRequest request,
             HttpServletRequest servletRequest) {
 
+        long t0 = LogBanner.inicio(log, "Registrar actividad en bitácora");
         try {
             List<Object> data = bitacoraService.registrarActividadConParticion(request);
 
             if (data.isEmpty()) {
+                log.warn("Horario ya cubierto por registros existentes, nada que registrar");
+                LogBanner.fin(log, "Registrar actividad en bitácora (sin cambios)", t0);
                 return ResponseEntity.unprocessableEntity()
                         .body(ApiResponse.<List<Object>>builder()
                                 .status(422)
@@ -50,12 +54,16 @@ public class BitacoraController {
                     ? "Actividad registrada exitosamente"
                     : data.size() + " franjas registradas por traslape con actividades existentes";
 
+            log.info("Actividad registrada: {} franja(s)", data.size());
+            LogBanner.fin(log, "Registrar actividad en bitácora", t0);
             return ResponseEntity.ok(ApiResponse.ok(data, mensaje)
                     .toBuilder().path(servletRequest.getRequestURI()).build());
 
         } catch (HttpClientErrorException ex) {
             HttpStatus httpStatus = HttpStatus.resolve(ex.getStatusCode().value());
             String reason = httpStatus != null ? httpStatus.getReasonPhrase() : "Error desconocido";
+            log.error("Error al registrar actividad en bitácora status={}", ex.getStatusCode());
+            LogBanner.fin(log, "Registrar actividad en bitácora CON ERROR", t0);
             return ResponseEntity.status(ex.getStatusCode())
                     .body(ApiResponse.<List<Object>>builder()
                             .status(ex.getStatusCode().value())
@@ -71,6 +79,7 @@ public class BitacoraController {
             @Valid @RequestBody BitacoraProyectosRequest request,
             HttpServletRequest servletRequest) {
 
+        long t0 = LogBanner.inicio(log, "Obtener proyectos por empleado username=" + request.getUsername());
         try {
             Long idEmpleado = bitacoraService.obtenerIdEmpleado(request.getUsername(), request.getPassword());
             Object data = bitacoraService.obtenerProyectosPorEmpleado(
@@ -79,6 +88,7 @@ public class BitacoraController {
                     request.getPassword()
             );
 
+            LogBanner.fin(log, "Obtener proyectos por empleado idEmpleado=" + idEmpleado, t0);
             return ResponseEntity.ok(ApiResponse.ok(data, "Proyectos obtenidos exitosamente")
                     .toBuilder().path(servletRequest.getRequestURI()).build());
 
@@ -100,8 +110,10 @@ public class BitacoraController {
             @Valid @RequestBody BitacoraProyectosRequest request,
             HttpServletRequest servletRequest) {
 
+        long t0 = LogBanner.inicio(log, "Obtener tipos de actividad username=" + request.getUsername());
         try {
             Object data = bitacoraService.obtenerTiposActividad(request.getUsername(), request.getPassword());
+            LogBanner.fin(log, "Obtener tipos de actividad", t0);
             return ResponseEntity.ok(ApiResponse.ok(data, "Tipos de actividad obtenidos exitosamente")
                     .toBuilder().path(servletRequest.getRequestURI()).build());
 
@@ -125,8 +137,10 @@ public class BitacoraController {
             @RequestParam String password,
             HttpServletRequest servletRequest) {
 
+        long t0 = LogBanner.inicio(log, "Obtener actividades por tipo idTipoActividad=" + idTipoActividad);
         try {
             Object data = bitacoraService.obtenerActividadesPorTipo(idTipoActividad, username, password);
+            LogBanner.fin(log, "Obtener actividades por tipo idTipoActividad=" + idTipoActividad, t0);
             return ResponseEntity.ok(ApiResponse.ok(data, "Actividades obtenidas exitosamente")
                     .toBuilder().path(servletRequest.getRequestURI()).build());
 
@@ -148,11 +162,16 @@ public class BitacoraController {
             @Valid @RequestBody RegistrosPorFechaRequest request,
             HttpServletRequest servletRequest) {
 
+        String proceso = "Obtener registros por fecha=" + request.getFecha() + " username=" + request.getUsername();
+        long t0 = LogBanner.inicio(log, proceso);
+
         Long idEmpleado = bitacoraService.obtenerIdEmpleado(request.getUsername(), request.getPassword());
         List<Map<String, Object>> data = bitacoraService.obtenerRegistrosPorEmpleadoYFecha(
                 idEmpleado, request.getFecha().toString(),
                 request.getUsername(), request.getPassword());
 
+        log.info("Registros obtenidos: {}", data.size());
+        LogBanner.fin(log, proceso, t0);
         return ResponseEntity.ok(ApiResponse.ok(data, "Registros obtenidos exitosamente")
                 .toBuilder().path(servletRequest.getRequestURI()).build());
     }

@@ -4,6 +4,7 @@ import com.spring.security.jwt.dto.ApiResponse;
 import com.spring.security.jwt.dto.LoginRequest;
 import com.spring.security.jwt.dto.LoginResponseDto;
 import com.spring.security.jwt.service.BitacoraTokenManager;
+import com.spring.security.jwt.util.LogBanner;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -31,17 +32,20 @@ public class AuthController {
             @Valid @RequestBody LoginRequest request,
             HttpServletRequest servletRequest) {
 
+        long t0 = LogBanner.inicio(log, "Login username=" + request.getUsername());
         try {
             LoginResponseDto data = tokenManager.autenticar(
                     request.getUsername(), request.getPassword());
 
-            log.info("Login exitoso username={}", request.getUsername());
+            log.info("Login exitoso username={} idEmpleado={}", request.getUsername(), data.getIdEmpleado());
+            LogBanner.fin(log, "Login username=" + request.getUsername(), t0);
             return ResponseEntity.ok(ApiResponse.ok(data, "Autenticación exitosa")
                     .toBuilder().path(servletRequest.getRequestURI()).build());
 
         } catch (HttpClientErrorException ex) {
             // Credenciales inválidas u otro 4xx devuelto por el SCO
             log.warn("Login rechazado username={} status={}", request.getUsername(), ex.getStatusCode());
+            LogBanner.fin(log, "Login RECHAZADO username=" + request.getUsername(), t0);
             return ResponseEntity.status(401)
                     .body(ApiResponse.<LoginResponseDto>builder()
                             .status(401)

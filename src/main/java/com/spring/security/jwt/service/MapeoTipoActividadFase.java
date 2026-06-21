@@ -1,6 +1,7 @@
 package com.spring.security.jwt.service;
 
 import com.spring.security.jwt.dto.Fase;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.text.Normalizer;
@@ -15,6 +16,7 @@ import java.util.Map;
  * La búsqueda es tolerante a mayúsculas/minúsculas y a acentos. Si el nombre
  * no está en el catálogo, la fase por defecto es {@link Fase#NO_APLICA}.
  */
+@Slf4j
 @Service
 public class MapeoTipoActividadFase {
 
@@ -52,13 +54,16 @@ public class MapeoTipoActividadFase {
         Map<String, Fase> normalizado = new LinkedHashMap<>();
         base.forEach((k, v) -> normalizado.put(normalizar(k), v));
         this.mapeo = Collections.unmodifiableMap(normalizado);
+        log.info("Catálogo de mapeo actividad→fase cargado: {} entradas", mapeo.size());
     }
 
     public Fase resolver(String nombreActividad) {
         if (nombreActividad == null || nombreActividad.isBlank()) {
             return Fase.NO_APLICA;
         }
-        return mapeo.getOrDefault(normalizar(nombreActividad), Fase.NO_APLICA);
+        Fase fase = mapeo.getOrDefault(normalizar(nombreActividad), Fase.NO_APLICA);
+        log.debug("Mapeo actividad='{}' → fase={}", nombreActividad, fase);
+        return fase;
     }
 
     public Map<String, Fase> obtenerMapeo() {
