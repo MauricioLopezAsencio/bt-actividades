@@ -4,9 +4,10 @@ name: keep-alive
 # Render duerme el servicio tras ~15 min de inactividad; pingamos cada ~10 min.
 on:
   schedule:
-    # Cada 10 minutos (UTC). GitHub puede retrasar/saltar ejecuciones bajo carga,
-    # por eso usamos 10 min y no 14, para tener margen frente al límite de 15.
-    - cron: "*/10 * * * *"
+    # Cada 5 minutos (mínimo permitido por GitHub Actions). Es lo más agresivo
+    # que tiene sentido: deja amplio margen frente a los ~15 min de inactividad
+    # con los que Render duerme el servicio, incluso si GitHub retrasa el cron.
+    - cron: "*/5 * * * *"
   workflow_dispatch:   # permite dispararlo manualmente desde la pestaña Actions
 
 jobs:
